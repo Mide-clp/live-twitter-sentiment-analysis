@@ -17,16 +17,13 @@ TWEET_KEYWORDS = ["covid19", "corona virus"]
 # creating stream listener
 class MYStreamListener(Stream):
     def on_data(self, raw_data):
-        data = json.loads(raw_data)
+
+        # deserializing data, then converting it to string to encode it
+        data = str(json.loads(raw_data)).encode("utf-8")
 
         # convert data to bytes and load into kafka producer
-        tweets = bytearray(data.encode("utf-8"))
+        tweets = bytearray(data)
         producer.send(TOPIC, tweets)
-
-        print(data)
-        file = json.dumps(data)
-        with open("data.json", "a") as f:
-            f.write(f"{file}\n")
 
         return True
 
