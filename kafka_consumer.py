@@ -16,9 +16,6 @@ else:
 
 # loading kafka message
 for msg in consumer:
-    try:
-        tweets = msg.value.decode("utf-8")
-        with open("data.json", "a") as f:
-            f.write(f"{tweets}\n")
-    except ValueError:
-        print("Decoding JSON has failed")
+    tweets = msg.value.decode("utf-8")
+    with open("data.txt", "a") as f:
+        f.write(f"{tweets}\n")

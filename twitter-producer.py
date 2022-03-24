@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from tweepy import Stream
 from kafka_producer import producer
+
 # load env keys
 load_dotenv()
 
@@ -11,7 +12,7 @@ ACCESS_TOKEN_SECRET = os.environ.get("ACCESS_TOKEN_SECRET")
 API_KEY = os.environ.get("API_KEY")
 API_SECRET = os.environ["API_SECRET"]
 TOPIC = "tweets_loader"
-TWEET_KEYWORDS = ["covid19", "corona virus"]
+TWEET_KEYWORDS = ["web3"]
 
 
 # creating stream listener
@@ -19,11 +20,24 @@ class MYStreamListener(Stream):
     def on_data(self, raw_data):
 
         # deserializing data, then converting it to string to encode it
-        data = str(json.loads(raw_data)).encode("utf-8")
+        # str(json.loads(raw_data)).encode("utf-8")
+        try:
+            tweet_data = json.loads(raw_data)
+
+            if "extended_tweet" in tweet_data:
+                msg = tweet_data["extended_tweet"]["full_text"] + " t_end"
+                tweet = bytearray(str(msg).encode("utf-8"))
+                producer.send(TOPIC, tweet)
+
+            else:
+                msg = tweet_data["text"] + " t_end"
+                tweet = bytearray(str(msg).encode("utf-8"))
+                producer.send(TOPIC, tweet)
+
+        except BaseException as e:
+            print("Error on_data: %s" % str(e))
 
         # convert data to bytes and load into kafka producer
-        tweets = bytearray(data)
-        producer.send(TOPIC, tweets)
 
         return True
 
@@ -36,7 +50,7 @@ class MYStreamListener(Stream):
 def stream_tweets(word):
     stream_listener = MYStreamListener(access_token=ACCESS_TOKEN, access_token_secret=ACCESS_TOKEN_SECRET,
                                        consumer_key=API_KEY, consumer_secret=API_SECRET)
-    stream_listener.filter(track=word)
+    stream_listener.filter(track=word, languages=["en"])
 
 
 # start streaming twitter data
