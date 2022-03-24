@@ -10,7 +10,7 @@ TOPIC = "tweets_loader"
 # clean tweet texts by removing hashtags, line, @ and RT and...
 def clean_tweet(lines):
     text_tweet = df.select(func.col("value").cast("string"))
-    words = text_tweet.select(func.explode(func.split(func.col("value"), "t_text")).alias("word"))
+    words = text_tweet.select(func.explode(func.split(func.col("value"), "t_end")).alias("word"))
     words = words.na.replace("", None)
     words = words.na.drop()
     words = words.withColumn("word", func.regexp_replace("word", r"http\S+", ""))
@@ -48,6 +48,17 @@ def text_sentiment(word):
     return word_sentiment_subjectivity
 
 
+# write to mongo database
+def write_to_mongo(text, epoch_id):
+    text.write \
+        .format("mongo") \
+        .option("uri", "mongodb://127.0.0.1") \
+        .option("database", "twitter") \
+        .option("collection", "web3") \
+        .mode("append") \
+        .save()
+
+
 # create user defined function (udf)
 
 
@@ -62,20 +73,19 @@ if __name__ == "__main__":
         .option("subscribe", TOPIC) \
         .option("startingOffsets", "latest").load()
 
-    # clean the data
+    # clean and read the data
     words_df = clean_tweet(df)
 
     # analyze text to define polarity and subjectivity
     word_sentiment = text_sentiment(words_df)
 
+    # write output to console
     query = word_sentiment.writeStream \
-        .format("console") \
-        .outputMode("append") \
-        .queryName("word") \
+        .foreachBatch(write_to_mongo) \
         .start()
 
     query.awaitTermination()
 
     spark.stop()
 
-# spark-submit --packages org.apache.spark:spark-streaming-kafka-0-10_2.12:3.2.1,org.apache.spark:spark-sql-kafka-0-10_2.12:3.2.1 spark_streaming.py
+# spark-submit --packages org.apache.spark:spark-streaming-kafka-0-10_2.12:3.2.1,org.apache.spark:spark-sql-kafka-0-10_2.12:3.2.1,org.mongodb.spark:mongo-spark-connector_2.12:3.0.1 spark_streaming.py

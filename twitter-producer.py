@@ -12,7 +12,7 @@ ACCESS_TOKEN_SECRET = os.environ.get("ACCESS_TOKEN_SECRET")
 API_KEY = os.environ.get("API_KEY")
 API_SECRET = os.environ["API_SECRET"]
 TOPIC = "tweets_loader"
-TWEET_KEYWORDS = ["russia", "ukraine"]
+TWEET_KEYWORDS = ["web3"]
 
 
 # creating stream listener
