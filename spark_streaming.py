@@ -59,9 +59,6 @@ def write_to_mongo(text, epoch_id):
         .save()
 
 
-# create user defined function (udf)
-
-
 # create spark session
 if __name__ == "__main__":
     spark = SparkSession.builder.master("local[*]").appName("Stream-twitter-data").getOrCreate()
@@ -79,7 +76,7 @@ if __name__ == "__main__":
     # analyze text to define polarity and subjectivity
     word_sentiment = text_sentiment(words_df)
 
-    # write output to console
+    # write output to mongodb
     query = word_sentiment.writeStream \
         .foreachBatch(write_to_mongo) \
         .start()

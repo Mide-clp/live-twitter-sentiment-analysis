@@ -19,25 +19,23 @@ TWEET_KEYWORDS = ["web3"]
 class MYStreamListener(Stream):
     def on_data(self, raw_data):
 
-        # deserializing data, then converting it to string to encode it
-        # str(json.loads(raw_data)).encode("utf-8")
         try:
             tweet_data = json.loads(raw_data)
 
             if "extended_tweet" in tweet_data:
                 msg = tweet_data["extended_tweet"]["full_text"] + " t_end"
+                # convert data to bytes and load into kafka producer
                 tweet = bytearray(str(msg).encode("utf-8"))
                 producer.send(TOPIC, tweet)
 
             else:
                 msg = tweet_data["text"] + " t_end"
+                # convert data to bytes and load into kafka producer
                 tweet = bytearray(str(msg).encode("utf-8"))
                 producer.send(TOPIC, tweet)
 
         except BaseException as e:
             print("Error on_data: %s" % str(e))
-
-        # convert data to bytes and load into kafka producer
 
         return True
 
