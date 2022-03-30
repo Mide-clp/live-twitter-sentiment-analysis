@@ -79,16 +79,19 @@ if __name__ == "__main__":
 
     word_json = word_sentiment.select(func.to_json(func.struct("word", "polarity_score", "subjectivity_score")).alias("value"))
 
-    # write output to mongodb
+    # write output to kafka
     query = word_json.writeStream \
         .format("Kafka") \
-        .option("topic", TOPIC) \
+        .option("topic", "tweets_loader_from_kafka") \
         .option("kafka.bootstrap.servers", "localhost:9092") \
         .option("checkpointLocation", "checkpoint") \
         .option("startingOffsets", "latest") \
+        .option("kafka.max.request.size", "10000000") \
+        .option("kafka.message.max.bytes", "10000000") \
         .outputMode("append") \
         .start()
 
+    # query = word_json.writeStream.outputMode("append").format("console").queryName("counts").start()
     query.awaitTermination()
 
     spark.stop()
