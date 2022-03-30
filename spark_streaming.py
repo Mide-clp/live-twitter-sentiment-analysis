@@ -3,6 +3,7 @@ from pyspark.sql import functions as func
 from pyspark.sql.types import FloatType
 from textblob import TextBlob
 
+
 # from pyspark.sql.functions import r
 TOPIC = "tweets_loader"
 
@@ -76,9 +77,16 @@ if __name__ == "__main__":
     # analyze text to define polarity and subjectivity
     word_sentiment = text_sentiment(words_df)
 
+    word_json = word_sentiment.select(func.to_json(func.struct("word", "polarity_score", "subjectivity_score")).alias("value"))
+
     # write output to mongodb
-    query = word_sentiment.writeStream \
-        .foreachBatch(write_to_mongo) \
+    query = word_json.writeStream \
+        .format("Kafka") \
+        .option("topic", TOPIC) \
+        .option("kafka.bootstrap.servers", "localhost:9092") \
+        .option("checkpointLocation", "checkpoint") \
+        .option("startingOffsets", "latest") \
+        .outputMode("append") \
         .start()
 
     query.awaitTermination()
