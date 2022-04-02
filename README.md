@@ -30,7 +30,7 @@ run ```pip3 install -r requirements.txt``` this installs all the packages needed
 ### Set up MongoDB
 _**Start MongoDb in a new terminal,**_ use `mongo` to start the mongo database
 
-Create database twitter with the following command `use twitter`
+Create database with the following command `use twitter`
 
 create collection with the following command `db.createCollection("collectionName")`
 ### Set up kafka and spark
