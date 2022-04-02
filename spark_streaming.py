@@ -3,12 +3,13 @@ from pyspark.sql import functions as func
 from pyspark.sql.types import FloatType
 from textblob import TextBlob
 
+
 # from pyspark.sql.functions import r
 TOPIC = "tweets_loader"
 
 
 # clean tweet texts by removing hashtags, line, @ and RT and...
-def clean_tweet(lines):
+def clean_tweet(df):
     text_tweet = df.select(func.col("value").cast("string"))
     words = text_tweet.select(func.explode(func.split(func.col("value"), "t_end")).alias("word"))
     words = words.na.replace("", None)
@@ -48,20 +49,6 @@ def text_sentiment(word):
     return word_sentiment_subjectivity
 
 
-# write to mongo database
-def write_to_mongo(text, epoch_id):
-    text.write \
-        .format("mongo") \
-        .option("uri", "mongodb://127.0.0.1") \
-        .option("database", "twitter") \
-        .option("collection", "web3") \
-        .mode("append") \
-        .save()
-
-
-# create user defined function (udf)
-
-
 # create spark session
 if __name__ == "__main__":
     spark = SparkSession.builder.master("local[*]").appName("Stream-twitter-data").getOrCreate()
@@ -79,13 +66,21 @@ if __name__ == "__main__":
     # analyze text to define polarity and subjectivity
     word_sentiment = text_sentiment(words_df)
 
-    # write output to console
-    query = word_sentiment.writeStream \
-        .foreachBatch(write_to_mongo) \
+    word_json = word_sentiment.select(func.to_json(func.struct("word", "polarity_score", "subjectivity_score")).alias("value"))
+
+    # write output to kafka
+    query = word_json.writeStream \
+        .format("Kafka") \
+        .option("topic", "tweets_loader_from_kafka") \
+        .option("kafka.bootstrap.servers", "localhost:9092") \
+        .option("checkpointLocation", "checkpoint") \
+        .option("startingOffsets", "latest") \
+        .option("kafka.max.request.size", "10000000") \
+        .option("kafka.message.max.bytes", "10000000") \
+        .outputMode("append") \
         .start()
 
     query.awaitTermination()
 
     spark.stop()
 
-# spark-submit --packages org.apache.spark:spark-streaming-kafka-0-10_2.12:3.2.1,org.apache.spark:spark-sql-kafka-0-10_2.12:3.2.1,org.mongodb.spark:mongo-spark-connector_2.12:3.0.1 spark_streaming.py
