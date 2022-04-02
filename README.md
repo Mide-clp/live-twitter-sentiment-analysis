@@ -15,7 +15,7 @@ for analysis.
 * Stream tweets from Twitter using keywords to filter tweets.
 * Use Kafka producer to publish event into topic.
 * Use Apache Spark to read event from the topic, create a  DataFrame and perform sentiment analysis on them.
-* write analyzed data back to kafka with another topic 
+* write analyzed data back to Kafka with another topic 
 * Use Kafka consumer to read event and write the event data to mongodb
 
 ## Environment and dependency setup
