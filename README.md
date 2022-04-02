@@ -6,7 +6,7 @@ product is performing and what is said about it. This repository contain scripts
 to perform user sentiment analysis by using Twitter API to get live tweets from users 
 for analysis.
 
-[**Note you need to have ELEVATED access for twitter API, for the twitter producer script to run**](https://developer.twitter.com/en/portal/products/elevated)
+[**Note you need to have ELEVATED access for twitter API, to run the twitter-producer.py script**](https://developer.twitter.com/en/portal/products/elevated)
 
 ## Architecture
 <img src="image/Architecture.png">
