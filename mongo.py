@@ -11,15 +11,13 @@ except Exception:
     print("could not connect to MongoDB")
 
 # connecting to database
-db = conn.twitter
+db = conn.twitter  # database name is twitter
 
 # create or use connection
-connection = db.web3
+connection = db.web3  # collection name is web3
 
 
 # insert a new document into mongo
 def insert_document(data):
     ids = connection.insert_one(data)
     print(f"successfully inserted {ids}")
-
-

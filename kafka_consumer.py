@@ -20,6 +20,5 @@ for msg in consumer:
     tweets = msg.value.decode("utf-8")
     tweets = json.loads(tweets)
     insert_document(tweets)
-    # with open("data.txt", "a") as f:
-    #     f.write(f"{tweets}\n")
+
 
