@@ -2,9 +2,11 @@
 
 ## Overview
 When a company or brand launches a new product, they would like to know how the 
-product is performing and what is said about it. The repository is used
+product is performing and what is said about it. This repository contain scripts that can be used
 to perform user sentiment analysis by using Twitter API to get live tweets from users 
 for analysis.
+
+**Note you need to have ELEVATED access for twitter API, for the twitter producer script to run**
 
 ## Architecture
 <img src="image/Architecture.png">
